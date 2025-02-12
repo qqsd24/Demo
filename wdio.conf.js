@@ -8,15 +8,23 @@ exports.config = {
         // 제외할 파일의 경로 (필요한 경우)
     ],
     maxInstances: 1,
+    // capabilities: [{
+    //     platformName: 'Android',
+    //     'appium:deviceName': 'Galaxy S9',  // 사용할 디바이스 이름
+    //     // 'appium:appPackage': 'io.appium.android.apis',
+    //     // 'appium:appActivity': 'io.appium.android.apis.ApiDemos',
+    //     'appium:automationName': 'UIAutomator2',
+    //     'appium:udid': '1c5af9e313037ece',  // 실제 디바이스의 UDID (필요한 경우)
+    //     'appium:noReset': false,  // 앱을 실행 후 재설정 방지
+    //     'appium:fullContextList': true, // 앱 내 모든 컨텍스트 보기
+    // }],
     capabilities: [{
-        platformName: 'Android',
-        'appium:deviceName': 'Galaxy S9',  // 사용할 디바이스 이름
-        // 'appium:appPackage': 'io.appium.android.apis',
-        // 'appium:appActivity': 'io.appium.android.apis.ApiDemos',
-        'appium:automationName': 'UIAutomator2',
-        'appium:udid': '1c5af9e313037ece',  // 실제 디바이스의 UDID (필요한 경우)
-        'appium:noReset': false,  // 앱을 실행 후 재설정 방지
-        'appium:fullContextList': true, // 앱 내 모든 컨텍스트 보기
+      platformName: 'Android',
+      'appium:deviceName': process.env.DEVICE_NAME || 'Galaxy S9',  // 환경 변수 DEVICE_NAME 사용
+      'appium:platformVersion': process.env.DEVICE_NAME === 'Galaxy S21' ? '14.0' : '10.0',  // 디바이스에 맞는 버전 설정
+      'appium:automationName': 'UiAutomator2',
+      'appium:udid': process.env.DEVICE_NAME === 'Galaxy S21' ? 'R3CR90QB4LF' : '1c5af9e313037ece',  // UDID 선택
+      'appium:noReset': false
     }],
     
     logLevel: 'info',  // 로깅 레벨 설정
