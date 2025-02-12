@@ -21,7 +21,6 @@ exports.config = {
     
     logLevel: 'info',  // 로깅 레벨 설정
     bail: 0,  // 테스트가 실패하더라도 계속 실행
-    baseUrl: 'http://localhost',  // Appium 서버 주소
     waitforTimeout: 10000,  // 각 요소를 기다리는 최대 시간
     connectionRetryTimeout: 90000,  // 연결 실패시 재시도 타임아웃
     connectionRetryCount: 3,
@@ -52,13 +51,15 @@ exports.config = {
         // <boolean> Enable this config to treat undefined definitions as warnings.
         ignoreUndefinedDefinitions: false
     },
+    // Appium 서버가 자동으로 시작되도록 설정
+    
     services: [
         ['appium', {
           command: 'appium',
           args: {
             // Appium 서버가 실행되는 URL을 지정합니다.
             // 기본적으로 로컬에서 실행하면 'http://127.0.0.1:4723'을 사용합니다.
-            appiumArgs: ['--address', '127.0.0.1', '--port', 4723]
+            appiumArgs: ['--address', '127.0.0.1', '--port', 4723, '--allow-cors']
           }
         }]
       ]
