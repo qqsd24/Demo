@@ -33,7 +33,14 @@ exports.config = {
     connectionRetryTimeout: 90000,  // 연결 실패시 재시도 타임아웃
     connectionRetryCount: 3,
     framework: 'cucumber',  // Cucumber 사용
-    reporters: ['spec'],  // 테스트 결과 리포터
+    reporters: [
+      'spec',
+      ['cucumberjs-json',{
+        jsonFolder: './reprts/json', //JSON 결과 저장 경로
+        language: 'en' //테스트 결과 언어
+      }]
+
+    ],  // 테스트 결과 리포터
     cucumberOpts: {
         require: ['./features/step-definitions/appMenu.steps.js'],  // Step 파일 경로
         backtrace: false,
