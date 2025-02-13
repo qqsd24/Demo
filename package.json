@@ -1,7 +1,7 @@
 {
   "name": "Demo",
   "version": "1.0.0",
-  "description": "",
+  "description": "WebDriverIO 7.x 와 appium 2.x",
   "main": "index.js",
   "scripts": {
     "test": "wdio wdio.conf.js"
