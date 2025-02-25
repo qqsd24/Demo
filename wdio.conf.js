@@ -16,7 +16,7 @@ module.exports.config = {
 	services: ['appium'],
 
 	runner: 'local',
-	specs: ['./features/**/login.feature'], // Feature 파일 경로
+	specs: ['./features/**/appMenu.feature'], // Feature 파일 경로
 
 	maxInstances: 1,
 	capabilities: [{
