@@ -57,43 +57,6 @@ module.exports.config = {
 
 		}]
 	],
-	// cucumber-html 리포트를 after hook에 추가
-    after: async function (result, capabilities, specs) {
-        const jsonFilePath = './reports/cucumber-json/report.json';
-        const htmlReportPath = './reports/cucumber-html/index.html';
-
-        // 리포트가 생성되었는지 확인하고 생성
-        if (fs.existsSync(jsonFilePath)) {
-            reporter.generate({
-                // Cucumber JSON 리포트를 기반으로 HTML 리포트 생성
-                jsonDir: './reports/cucumber-json',
-                reportPath: './reports/cucumber-html',
-                openReportInBrowser: false, // true : 리포트가 완료되면 브라우저에서 열기
-                metadata: {
-                    browser: {
-                        name: 'chrome',
-                        version: '104.0',
-                    },
-                    device: 'Local test machine',
-                    platform: {
-                        name: 'Windows',
-                        version: '10'
-                    }
-                },
-                customData: {
-                    title: 'Test Report',
-                    data: [
-                        { label: 'Project', value: 'Appium Cucumber Test' },
-                        { label: 'Release', value: '1.0.0' },
-                        { label: 'Execution Time', value: new Date().toLocaleString() },
-                    ]
-                }
-            });
-            console.log('✅ HTML 리포트가 성공적으로 생성되었습니다.');
-        } else {
-            console.error('❌ JSON 리포트 파일을 찾을 수 없습니다.');
-        }
-    },
 
 	cucumberOpts: {
 		require: ['./features/step-definitions/**/login.js'], 				// Step 정의 파일 경로
@@ -114,11 +77,6 @@ module.exports.config = {
 		} else {
 		  console.log(`🔔 기본 태그 '@NonService'를 실행합니다.`);
 		}
-	  },
-
-	before: async function () {
-		console.log("✅ Test starting...");
-		console.log("📌 Device Metadata:", capabilities);
 
 		// reports/json 폴더가 없으면 생성
 		const reportsPath = path.resolve(__dirname, 'reports/cucumber-json');
@@ -133,8 +91,13 @@ module.exports.config = {
 			fs.mkdirSync(screenshotsPath, { recursive: true });
 			console.log("✅ screenshots 폴더가 생성되었습니다.");
 		}
+	  },
 
+	before: async function () {
+		console.log("✅ Test starting...");
+		console.log("📌 Device Metadata:", capabilities);
 	},
+
 	afterStep: async function (step, scenario, result, context) {
 		console.log('AfterStep 에서의 Step:', step);
 		console.log('AfterStep 에서의 Scenario:', scenario);
@@ -152,33 +115,47 @@ module.exports.config = {
 		 * @param {object}                 context          Cucumber World object
 		 */
 
-
-
-
-		// if (!result.passed) { // 스텝이 실패한 경우
-		// 	const timestamp = new Date().toISOString().replace(/:/g, '-');
-		// 	const filename = `./screenshots/${scenario.name}_${timestamp}.png`;
-
-		// 	try {
-		// 		await browser.saveScreenshot(filename);
-		// 		console.log('----------------------------------------');
-		// 		console.log(`❌ 테스트 실패! 스크린샷 저장됨: ${filename}`);
-		// 		console.log('----------------------------------------');
-
-		// 		// Cucumber 리포트에 스크린샷 첨부 (Cucumber 실행 시 context.attach 사용 가능)
-		// 		if (this.attach) {
-		// 			const screenshotBuffer = fs.readFileSync(filename);
-		// 			this.attach(screenshotBuffer, 'image/png');  // Cucumber 리포트에 스크린샷 첨부
-		// 			console.log('✅ 스크린샷이 Cucumber 리포트에 첨부되었습니다.');
-		// 		} else {
-		// 			console.warn('⚠️ scenario.attach가 존재하지 않습니다. 첨부하지 못했습니다.');
-		// 		}
-		// 	} catch (e) {
-		// 		console.error('스크린샷 저장 중 오류 발생:', e);
-		// 	}
-		// }
-
 	},
+
+	// cucumber-html 리포트를 after hook에 추가
+	after: async function (result, capabilities, specs) {
+		const jsonFilePath = './reports/cucumber-json/report.json';
+		const htmlReportPath = './reports/cucumber-html/index.html';
+
+		// 리포트가 생성되었는지 확인하고 생성
+		if (fs.existsSync(jsonFilePath)) {
+			reporter.generate({
+				// Cucumber JSON 리포트를 기반으로 HTML 리포트 생성
+				jsonDir: './reports/cucumber-json',
+				reportPath: './reports/cucumber-html',
+				openReportInBrowser: false, // true : 리포트가 완료되면 브라우저에서 열기
+				metadata: {
+					browser: {
+						name: 'chrome',
+						version: '104.0',
+					},
+					device: 'Local test machine',
+					platform: {
+						name: 'Windows',
+						version: '10'
+					}
+				},
+				customData: {
+					title: 'Test Report',
+					data: [
+						{ label: 'Project', value: 'Appium Cucumber Test' },
+						{ label: 'Release', value: '1.0.0' },
+						{ label: 'Execution Time', value: new Date().toLocaleString() },
+					]
+				}
+			});
+			console.log('✅ HTML 리포트가 성공적으로 생성되었습니다.');
+		} else {
+			console.error('❌ JSON 리포트 파일을 찾을 수 없습니다.');
+		}
+	},
+
+
 	afterScenario: async function (world, result, context) {
 
 		console.log('현재 시나리오의 상태:', result.passed);
