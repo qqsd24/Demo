@@ -7,35 +7,23 @@ const reporter = require('multiple-cucumber-html-reporter'); // ✅ multiple-cuc
 
 module.exports.config = {
 
-	// Appium을 별도로 동작할 경우
-	// hostname: 'localhost',
-	// port: 4723,
-	// services: [],
-
-	//Appium을 npx wdio wdio.conf.js와 함께 실행하려면
 	services: ['appium'],
 
 	runner: 'local',
-	specs: ['./features/**/appMenu.feature'], // Feature 파일 경로
+	specs: ['./src/features/**/*.feature'],
 
 	maxInstances: 1,
 	capabilities: [{
-		platformName: 'Android',
-		'appium:deviceName': process.env.DEVICE_NAME || 'Galaxy S9', // 환경 변수 DEVICE_NAME 사용
-		'appium:platformVersion': process.env.DEVICE_NAME === 'Galaxy S21' ? '14.0' : '10.0', // 디바이스에 맞는 버전 설정
-		'appium:automationName': 'UiAutomator2',
-		'appium:udid': process.env.DEVICE_NAME === 'Galaxy S21' ? 'R3CR90QB4LF' : '1c5af9e313037ece', // UDID 선택
-		'appium:noReset': false
-		// "platformName": "Android",
-        // "appium:deviceName": "Galaxy S21",
-        // "appium:platformVersion": "14.0",
-        // "appium:automationName": "UiAutomator2",
-        // "appium:udid": "R3CR90QB4LF",
-        // "appium:noReset": "false"
+		"platformName": "Android",
+        "appium:deviceName": "Galaxy Wide4",
+        "appium:platformVersion": "11.0",
+        "appium:automationName": "UiAutomator2",
+        "appium:udid": "R59N70036ZL",
+        "appium:noReset": "false"
 	}],
 
-	logLevel: 'info', //Detail한 값을 보고 싶다면 'debug' 설정하면 됨.
-	bail: 0,  // 모든 테스트가 끝날 때까지 실행되도록 설정
+	logLevel: 'info',
+	bail: 0,  
 	waitforTimeout: 10000,
 	connectionRetryTimeout: 90000,
 	connectionRetryCount: 3,
@@ -44,11 +32,7 @@ module.exports.config = {
 
 	reporters: [
 		'spec',
-		[Video, {
-			saveAllVideos: false, // If true, also saves videos for successful test cases
-			videoSlowdownMultiplier: 3, // 녹화 속도 (높을수록 부드러움)
-			outputDir: './videoReports', // 비디오 저장 위치
-		}],
+
 		['cucumberjs-json', {
 			jsonFolder: './reports/cucumber-json', //JSON 디폴트 폴더
 			outputDir: './reports/cucumber-json', // 리포트 JSON 파일이 저장될 경로
@@ -59,45 +43,14 @@ module.exports.config = {
 	],
 
 	cucumberOpts: {
-		require: ['./features/step-definitions/**/login.js'], 				// Step 정의 파일 경로
-		tags: [process.env.CUCUMBER_TAGS || '@NonService'], 			// 기본값: @NonService
+		require: ['./src/step-definitions/**/*.js'], 				// Step 정의 파일 경로
 		backtrace: false, 												// 'backtrace'는 실패한 스텝에서 스택 추적 정보를 얼마나 자세히 보여줄지 설정합니다.
-		format: ['json:./reports/cucumber-json/report.json'],			// 'format'은 리포트 형식을 지정하는 설정입니다. 여기서는 'json' 형식으로 리포트를 출력합니다.
-		dryRun: false,													// 'dryRun'은 실제로 테스트를 실행하지 않고 시나리오가 유효한지 확인하는 데 사용됩니다.
-		failFast: false,												// 'failFast'는 첫 번째 실패 시 테스트 실행을 멈추게 하는 설정입니다.
-		snippets: true,
-		source: true,
-		strict: false, 													// 'strict'는 테스트가 실패할 경우 경고 없이 바로 실패로 처리합니다.
 		timeout: 60000,		 											// 단계 실행 시간 제한
 	},
-	// 명령어로 입력된 태그가 있을 경우만 동작하도록
-	onPrepare: () => {
-		if (process.env.CUCUMBER_TAGS) {
-		  console.log(`🔔 ${process.env.CUCUMBER_TAGS} 태그를 실행합니다.`);
-		} else {
-		  console.log(`🔔 기본 태그 '@NonService'를 실행합니다.`);
-		}
-
-		// reports/json 폴더가 없으면 생성
-		const reportsPath = path.resolve(__dirname, 'reports/cucumber-json');
-		if (!fs.existsSync(reportsPath)) {
-			fs.mkdirSync(reportsPath, { recursive: true });
-			console.log("✅ reports/cucumber-json 폴더가 생성되었습니다.");
-		}
-
-		// screenshots 폴더가 없으면 생성
-		const screenshotsPath = path.resolve(__dirname, 'screenshots');
-		if (!fs.existsSync(screenshotsPath)) {
-			fs.mkdirSync(screenshotsPath, { recursive: true });
-			console.log("✅ screenshots 폴더가 생성되었습니다.");
-		}
-	  },
 
 	before: async function () {
-		console.log("✅ Test starting...");
-		console.log("📌 Device Metadata:", capabilities);
+	
 	},
-
 	afterStep: async function (step, scenario, result, context) {
 		console.log('AfterStep 에서의 Step:', step);
 		console.log('AfterStep 에서의 Scenario:', scenario);
@@ -119,40 +72,7 @@ module.exports.config = {
 
 	// cucumber-html 리포트를 after hook에 추가
 	after: async function (result, capabilities, specs) {
-		const jsonFilePath = './reports/cucumber-json/report.json';
-		const htmlReportPath = './reports/cucumber-html/index.html';
-
-		// 리포트가 생성되었는지 확인하고 생성
-		if (fs.existsSync(jsonFilePath)) {
-			reporter.generate({
-				// Cucumber JSON 리포트를 기반으로 HTML 리포트 생성
-				jsonDir: './reports/cucumber-json',
-				reportPath: './reports/cucumber-html',
-				openReportInBrowser: false, // true : 리포트가 완료되면 브라우저에서 열기
-				metadata: {
-					browser: {
-						name: 'chrome',
-						version: '104.0',
-					},
-					device: 'Local test machine',
-					platform: {
-						name: 'Windows',
-						version: '10'
-					}
-				},
-				customData: {
-					title: 'Test Report',
-					data: [
-						{ label: 'Project', value: 'Appium Cucumber Test' },
-						{ label: 'Release', value: '1.0.0' },
-						{ label: 'Execution Time', value: new Date().toLocaleString() },
-					]
-				}
-			});
-			console.log('✅ HTML 리포트가 성공적으로 생성되었습니다.');
-		} else {
-			console.error('❌ JSON 리포트 파일을 찾을 수 없습니다.');
-		}
+	
 	},
 
 
@@ -199,16 +119,6 @@ module.exports.config = {
 			}
 
 		}
-		// 동영상 생성 확인을 확인하고 파일 목록을 알려줍니다.
-		const videoDirectory = './videoReports';
-		if (fs.existsSync(videoDirectory)) {
-			console.log('✅ 비디오가 저장된 디렉토리:', videoDirectory);
-			const files = fs.readdirSync(videoDirectory);
-			console.log('현재 비디오 디렉토리의 파일 목록:', files);
-		} else {
-			console.log('❌ 비디오 디렉토리가 없습니다.');
-		}
-
 
 	},
 
@@ -282,58 +192,6 @@ module.exports.config = {
 	// 	*/
 	// },
 	onComplete: async function (exitCode, config, capabilities, results) {
-		console.log('✅ onComplete 훅이 실행되었습니다.');
-		console.log('✅ exitCode =:', exitCode);
-		/**
-		* Gets executed when a refresh happens.
-		* @param {string} oldSessionId session ID of the old session
-		* @param {string} newSessionId session ID of the new session
-		*/
-
-		/**
-		 * 
-		 * 모든 것이 끝나면 Slack으로 전달할때 사용한다.
-		 * 
-		 */
-
-		// const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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";
-
-		// // ✅ 동작한 Device Name 가져오기
-		// const deviceName = capabilities[0]['appium:deviceName'];
-
-		// // ✅ 실행된 태그 정보 가져오기
-		// const executedTag = process.env.CUCUMBER_TAGS || '@NonService';
-
-		// let statusMessage = "✅ *테스트 성공!* 🎉 모든 시나리오가 통과되었습니다!";
-		// if (results.failed > 0) {
-		// 	statusMessage = `❌ *테스트 실패!* 🔴 실패한 시나리오: ${results.failed}개`;
-		// }
-
-		// // ✅ Slack 메시지에 Device Name & Tag 추가
-		// const payload = {
-		// 	text: `*테스트 결과 알림*\n${statusMessage}\n\n` +
-		// 		`*프로젝트:* TadaDriver\n` +
-		// 		`*환경:* 로컬 테스트\n` +
-		// 		`*디바이스:* ${deviceName}\n` +
-		// 		`*실행된 태그:* ${executedTag}`
-		// };
-
-		// try {
-		// 	const response = await axios.post(SLACK_WEBHOOK_URL, payload);
-		// 	console.log(`✅ Slack 메시지 전송 성공! 응답 코드: ${response.status}`);
-		// } catch (error) {
-		// 	console.error("❌ Slack 메시지 전송 실패!", error.message);
-		// }
-		/** 
-		 * 테스트는 실패했지만, 스크립트가 모두 동작을 하면 성공으로 되는 경우가 있음.
-		 * */
-		if (results.failed > 0) {
-			console.log("❌ 테스트 실패! Jenkins에서 빌드를 실패로 설정합니다.");
-			process.exit(1);  // Jenkins에서 빌드 실패로 처리하도록 설정
-		} else {
-			console.log("✅ 모든 테스트 성공! Jenkins에서 빌드를 성공으로 설정합니다.");
-			process.exit(0);  // 정상 종료
-		}
-	},
+	}
 
 };
