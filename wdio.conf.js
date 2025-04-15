@@ -1,197 +1,199 @@
-const path = require('path');
+
 const fs = require('fs');
-const axios = require('axios'); // ✅ axios 추가, Slack 에 사용됨.
-const Video = require('wdio-video-reporter').default; // ✅ 동영상 리포터 추가 ✅ default 속성 추가
+
 const reporter = require('multiple-cucumber-html-reporter'); // ✅ multiple-cucumber-html-reporter 추가
+const cucumberReport = require('wdio-cucumberjs-json-reporter')
 
+const jsonFolderPath = './reports/cucumber-json';
+const htmlReportPath = './reports/cucumber-html';
+const screenshotsPath = './reports/screenshot';
+exports.config = {
+    
+    specs: [
+        './src/features/**/Demo1.feature'
+    ],
+    // Patterns to exclude.
+    exclude: [
+        // 'path/to/excluded/files'
+    ],
+    //
+    // ============
+    // Capabilities
+    // ============
+    // Define your capabilities here. WebdriverIO can run multiple capabilities at the same
+    // time. Depending on the number of capabilities, WebdriverIO launches several test
+    // sessions. Within your capabilities you can overwrite the spec and exclude options in
+    // order to group specific specs to a specific capability.
+    //
+    // First, you can define how many instances should be started at the same time. Let's
+    // say you have 3 different capabilities (Chrome, Firefox, and Safari) and you have
+    // set maxInstances to 1; wdio will spawn 3 processes. Therefore, if you have 10 spec
+    // files and you set maxInstances to 10, all spec files will get tested at the same time
+    // and 30 processes will get spawned. The property handles how many capabilities
+    // from the same test should run tests.
+    //
+    maxInstances: 10,
+    //
+    // If you have trouble getting all important capabilities together, check out the
+    // Sauce Labs platform configurator - a great tool to configure your capabilities:
+    // https://saucelabs.com/platform/platform-configurator
+    //
+    capabilities: [{
+        // capabilities for local Appium web tests on an Android Emulator
+        platformName: 'Android',
+        'appium:deviceName': 'Galaxy S21',
+        'appium:platformVersion': '14.0',
+        'appium:automationName': 'UiAutomator2'
+    }],
 
-module.exports.config = {
+    //
+    // ===================
+    // Test Configurations
+    // ===================
+    // Define all options that are relevant for the WebdriverIO instance here
+    //
+    // Level of logging verbosity: trace | debug | info | warn | error | silent
+    logLevel: 'info',
+    //
+    // Set specific log levels per logger
+    // loggers:
+    // - webdriver, webdriverio
+    // - @wdio/browserstack-service, @wdio/lighthouse-service, @wdio/sauce-service
+    // - @wdio/mocha-framework, @wdio/jasmine-framework
+    // - @wdio/local-runner
+    // - @wdio/sumologic-reporter
+    // - @wdio/cli, @wdio/config, @wdio/utils
+    // Level of logging verbosity: trace | debug | info | warn | error | silent
+    // logLevels: {
+    //     webdriver: 'info',
+    //     '@wdio/appium-service': 'info'
+    // },
+    //
+    // If you only want to run your tests until a specific amount of tests have failed use
+    // bail (default is 0 - don't bail, run all tests).
+    bail: 0,
+    //
+    // Set a base URL in order to shorten url command calls. If your `url` parameter starts
+    // with `/`, the base url gets prepended, not including the path portion of your baseUrl.
+    // If your `url` parameter starts without a scheme or `/` (like `some/path`), the base url
+    // gets prepended directly.
+    // baseUrl: 'http://localhost:8080',
+    //
+    // Default timeout for all waitFor* commands.
+    waitforTimeout: 10000,
+    //
+    // Default timeout in milliseconds for request
+    // if browser driver or grid doesn't send response
+    connectionRetryTimeout: 120000,
+    //
+    // Default request retries count
+    connectionRetryCount: 3,
+    //
+    // Test runner services
+    // Services take over a specific job you don't want to take care of. They enhance
+    // your test setup with almost no effort. Unlike plugins, they don't add new
+    // commands. Instead, they hook themselves up into the test process.
+    services: ['appium'],
 
-	services: ['appium'],
-
-	runner: 'local',
-	specs: ['./src/features/**/*.feature'],
-
-	maxInstances: 1,
-	capabilities: [{
-		"platformName": "Android",
-        "appium:deviceName": "Galaxy Wide4",
-        "appium:platformVersion": "11.0",
-        "appium:automationName": "UiAutomator2",
-        "appium:udid": "R59N70036ZL",
-        "appium:noReset": "false"
-	}],
-
-	logLevel: 'info',
-	bail: 0,  
-	waitforTimeout: 10000,
-	connectionRetryTimeout: 90000,
-	connectionRetryCount: 3,
-
-	framework: 'cucumber', // Cucumber 사용
-
-	reporters: [
-		'spec',
-
-		['cucumberjs-json', {
-			jsonFolder: './reports/cucumber-json', //JSON 디폴트 폴더
-			outputDir: './reports/cucumber-json', // 리포트 JSON 파일이 저장될 경로
-			reportFile: 'report.json',            // 리포트 파일 이름
+    // Framework you want to run your specs with.
+    // The following are supported: Mocha, Jasmine, and Cucumber
+    // see also: https://webdriver.io/docs/frameworks
+    //
+    // Make sure you have the wdio adapter package for the specific framework installed
+    // before running any tests.
+    framework: 'cucumber',
+    
+    //
+    // The number of times to retry the entire specfile when it fails as a whole
+    // specFileRetries: 1,
+    //
+    // Delay in seconds between the spec file retry attempts
+    // specFileRetriesDelay: 0,
+    //
+    // Whether or not retried spec files should be retried immediately or deferred to the end of the queue
+    // specFileRetriesDeferred: false,
+    //
+    // Test reporter for stdout.
+    // The only one supported by default is 'dot'
+    // see also: https://webdriver.io/docs/dot-reporter
+    reporters: ['spec',
+        ['cucumberjs-json', {
+			jsonFolder: jsonFolderPath, 			//JSON 디폴트 폴더
 			language: 'en',                       // 언어 설정
 
 		}]
-	],
+    ],
 
-	cucumberOpts: {
-		require: ['./src/step-definitions/**/*.js'], 				// Step 정의 파일 경로
-		backtrace: false, 												// 'backtrace'는 실패한 스텝에서 스택 추적 정보를 얼마나 자세히 보여줄지 설정합니다.
-		timeout: 60000,		 											// 단계 실행 시간 제한
-	},
+    // If you are using Cucumber you need to specify the location of your step definitions.
+    cucumberOpts: {
+        // <string[]> (file/dir) require files before executing features
+        require: ['./src/step-definitions/**/Demo1.steps.js'],
+        // <boolean> show full backtrace for errors
+        backtrace: false,
+        // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
+        requireModule: [],
+        // <boolean> invoke formatters without executing steps
+        dryRun: false,
+        // <boolean> abort the run on first failure
+        failFast: false,
+        // <string[]> Only execute the scenarios with name matching the expression (repeatable).
+        name: [],
+        // <boolean> hide step definition snippets for pending steps
+        snippets: true,
+        // <boolean> hide source uris
+        source: true,
+        // <boolean> fail if there are any undefined or pending steps
+        strict: false,
+        // <string> (expression) only execute the features or scenarios with tags matching the expression
+        tagExpression: '',
+        // <number> timeout for step definitions
+        timeout: 60000,
+        // <boolean> Enable this config to treat undefined definitions as warnings.
+        ignoreUndefinedDefinitions: false
+    },
+    onPrepare: async function() {
+        if (!fs.existsSync(screenshotsPath)) {
+			fs.mkdirSync(screenshotsPath, { recursive: true });
+			console.log("✅ screenshots 폴더가 생성되었습니다.");
+		}
+    }
+,
+    afterScenario: async function (world, result, context) {
 
-	before: async function () {
-	
-	},
-	afterStep: async function (step, scenario, result, context) {
-		console.log('AfterStep 에서의 Step:', step);
-		console.log('AfterStep 에서의 Scenario:', scenario);
-		console.log('AfterStep 에서의 result:', result);
-		/**
-		  * afterStep: function (step, scenario, result, context) {
-		},
-		 *
-		 * Runs after a Cucumber Scenario.
-		 * @param {ITestCaseHookParameter} world            world object containing information on pickle and test step
-		 * @param {object}                 result           results object containing scenario results `{passed: boolean, error: string, duration: number}`
-		 * @param {boolean}                result.passed    true if scenario has passed
-		 * @param {string}                 result.error     error stack if scenario failed
-		 * @param {number}                 result.duration  duration of scenario in milliseconds
-		 * @param {object}                 context          Cucumber World object
+
+		/***
+		 * Screenshot 기능
+		 * parameter로 받은 result의 결과를 확인하여 failed 인 경우에만 사진을 촬영한다.
+		 * Cucumber Report에 파라미터를 만들어 넣는다.
 		 */
-
-	},
-
-	// cucumber-html 리포트를 after hook에 추가
-	after: async function (result, capabilities, specs) {
-	
-	},
-
-
-	afterScenario: async function (world, result, context) {
-
-		console.log('현재 시나리오의 상태:', result.passed);
-		console.log('실행된 Feature :', world.pickle.uri);
-		console.log('실행된 Scenario:', world.pickle.name);
-		console.log('컨텍스트 파일:', context);
-
-		// 	/**
-		// 	 * 
-		// 	 * afterScenario: function (world, result, context) {
-		// 	 * },
-		// 	 * Runs after a Cucumber Feature.
-		// 	 * @param {string}                   uri      path to feature file
-		// 	 * @param {GherkinDocument.IFeature} feature  Cucumber feature object
-		// 	 */
-
-		// 	/** 
-		// 	 * 시나리오 진행할 때 마다 진행될 때 넣는 코드라는 것을 알게됨. 
-		// 	 * 시나리오 끝나고 에러가 있다면 사진을 촬영하도록 코드를 작성 
-		// 	 * 
-		// 	 */
-		if (!result.passed) {  // 실패한 테스트가 있을 경우
+        // screenshots 폴더가 없으면 생성
+		
+		if (result.passed) {
 			const timestamp = new Date().toISOString().replace(/:/g, '-');
-			const filename = `./screenshots/${world.pickle.name}_${timestamp}.png`;
+			const filename = `${screenshotsPath}/${world.pickle.name}_${timestamp}.png`;
 
-			try {
-				await browser.saveScreenshot(filename);
-				console.log('----------------------------------------');
-				console.log(`❌ 테스트 실패! 스크린샷 저장됨: ${filename}`);
-				console.log('----------------------------------------');
+			await browser.saveScreenshot(filename);
+			const base64Image = fs.readFileSync(filename).toString('base64');
+			cucumberReport.attach(base64Image, 'image/png');
+		}
+    },
+    onComplete: async function () {
 
-				// context.attach가 존재하면 Cucumber 리포트에 스크린샷 첨부
-				if (context.attach) {
-					context.attach(fs.readFileSync(filename), 'image/png');
-					console.log('✅ 스크린샷이 Cucumber 리포트에 첨부되었습니다.');
-				} else {
-					console.warn('⚠️ context.attach가 존재하지 않습니다. 첨부하지 못했습니다.');
-				}
-			} catch (e) {
-				console.error('스크린샷 저장 중 오류 발생:', e);
-			}
-
+		/**
+		 * HTML REPORT 생성
+		 */
+		// 리포트가 생성되었는지 확인하고 생성
+		if (fs.existsSync(jsonFolderPath)) {
+			reporter.generate({
+			
+				jsonDir: jsonFolderPath,
+				reportPath: htmlReportPath,
+				openReportInBrowser: false,
+			});
+		} else {
+			console.error('❌ JSON 리포트 파일을 찾을 수 없습니다.');
 		}
 
 	},
 
-
-	// afterTest: async function (test, context, { error }) {
-	// 	/**
-	// 	 * Feature가 끝나면 동작하는 부분.
-	// 	 * 
-	// 	 * Cucumber 작성한 후 실행을 했을 때 동작을 하지 않음.
-	// 	 * https://webdriver.io/docs/configurationfile/ 사이트에서 확인 했을 때 Mocha, Jasmine에서만 지원한다는 것을 알게됨.
-	// 	 * 그래서 코드를 삭제 함.
-	// 	 * 
-	// 	 * afterTest: function (test, context, { error, result, duration, passed, retries }) {
-	// 	 * },
-	// 	 * Hook that gets executed after the suite has ended (in Mocha/Jasmine only).
-	// 	 * @param {object} suite suite details
-
-	// 	 */
-
-	// },
-	// after: async function (result, capabilities, specs) {
-	// 	/** 
-	// 	 * After Hook 은 WebDriver Session이 끝나면 동작을 합니다. 
-	// 	 * 
-	// 	 * after: function (result, capabilities, specs) {
-	// 	 * },
-	// 	 * Gets executed right after terminating the webdriver session.
-	// 	 * @param {object} config wdio configuration object
-	// 	 * @param {Array.<Object>} capabilities list of capabilities details
-	// 	 * @param {Array.<String>} specs List of spec file paths that ran
-
-	// 	*/
-	// 	console.log('✅ after 훅이 실행되었습니다.');
-	// 	console.log('✅ after 훅이 있는 result:', result);
-	// 	console.log('✅ after 훅에 있는 Context:', capabilities);
-	// 	console.log('✅ after 훅에 있는 results 확인:', specs);
-
-	// 	/*
-	// 		Feature가 종료 된 후 스크린 샷을 찍고 싶다면, 여기에 추가를 하면 됩니다.
-	// 		result 는 실패에 대한 숫자가 노출 됩니다. 모두 성공하면 0, 실패한 갯수만큼 숫자가 늘어납니다.
-	// 	if (result > 0) {  // 실패한 테스트가 있을 경우
-	// 		console.log('테스트 실패로 스크린샷을 찍습니다.');
-
-	// 		// results에 포함된 경로에서 파일 이름만 추출
-	// 		console.log("✅ FeatureFile 추출합니다.");
-
-	// 		// const featureFileName = path.basename(specs, '.feature'); //results 경로가 맞는데, 동작이 안되어서 배열로 변경함.
-	// 		const featureFileName = path.basename(specs[0], '.feature');
-
-	// 		console.log(`✅ featureFile Name 확인: ${featureFileName}`);
-	// 		const timestamp = new Date().toISOString().replace(/:/g, '-');
-	// 		const filename = `./screenshots/${featureFileName}_${timestamp}.png`;
-
-
-	// 		try {
-	// 			await browser.saveScreenshot(filename);
-	// 			console.log('----------------------------------------');
-	// 			console.log(`❌ 테스트 실패! 스크린샷 저장됨: ${filename}`);
-	// 			console.log('----------------------------------------');
-
-	// 			// context에 cucumberReporter가 있을 경우 첨부
-	// 			if (context.cucumberReporter) {
-	// 				const cucumberReporter = context.cucumberReporter;
-	// 				cucumberReporter.attach(fs.readFileSync(filename), 'image/png');
-	// 				console.log('✅ 스크린샷이 Cucumber 리포트에 첨부되었습니다.');
-	// 			}
-	// 		} catch (e) {
-	// 			console.error('스크린샷 저장 중 오류 발생:', e);
-	// 		}
-	// 	}
-	// 	*/
-	// },
-	onComplete: async function (exitCode, config, capabilities, results) {
-	}
-
-};
+}
