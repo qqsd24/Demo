@@ -4,11 +4,8 @@ const assert = require('assert');
 console.log("✅ appMenu.js is loaded");  // 디버깅용 로그 추가
 Given('I launch the app', async function () {
   console.log("✅ Step: I launch the app");
-  await browser.execute('mobile: activateApp', {
-    appId: 'io.appium.android.apis',
-    appPackage: 'io.appium.android.apis',
-    appActivity: 'io.appium.android.apis.ApiDemos'
-});
+  await browser.startActivity('io.appium.android.apis','io.appium.android.apis.ApiDemos')
+
 });
 
 When('I click on the App button', async function () {
@@ -60,4 +57,7 @@ Then('The correct dialog message should be displayed', async () => {
     const listDialogBtn = await $('~List dialog');
     await listDialogBtn.click();
   }
+  // 앱 종료
+  await browser.terminateApp('io.appium.android.apis');
+  console.log("✅ App terminated after all scenarios completion.");
 });

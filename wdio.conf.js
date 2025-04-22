@@ -8,14 +8,6 @@ const jsonFolderPath = './reports/cucumber-json';
 const htmlReportPath = './reports/cucumber-html';
 const screenshotsPath = './reports/screenshot';
 exports.config = {
-    
-    specs: [
-        './src/features/**/Demo1.feature'
-    ],
-    // Patterns to exclude.
-    exclude: [
-        // 'path/to/excluded/files'
-    ],
     //
     // ============
     // Capabilities
@@ -43,7 +35,8 @@ exports.config = {
         platformName: 'Android',
         'appium:deviceName': 'Galaxy S21',
         'appium:platformVersion': '14.0',
-        'appium:automationName': 'UiAutomator2'
+        'appium:automationName': 'UiAutomator2',
+        'appium:noReset': false
     }],
 
     //
@@ -93,7 +86,13 @@ exports.config = {
     // Services take over a specific job you don't want to take care of. They enhance
     // your test setup with almost no effort. Unlike plugins, they don't add new
     // commands. Instead, they hook themselves up into the test process.
-    services: ['appium'],
+    services: [
+		['appium', {
+			args: {
+				allowInsecure: 'adb_shell',
+			},
+		}]
+	],
 
     // Framework you want to run your specs with.
     // The following are supported: Mocha, Jasmine, and Cucumber
@@ -124,6 +123,13 @@ exports.config = {
 		}]
     ],
 
+    specs: [
+        './src/features/**/Demo1.feature'
+    ],
+    // Patterns to exclude.
+    exclude: [
+        // 'path/to/excluded/files'
+    ],
     // If you are using Cucumber you need to specify the location of your step definitions.
     cucumberOpts: {
         // <string[]> (file/dir) require files before executing features
