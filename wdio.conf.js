@@ -1,12 +1,26 @@
 
+require('dotenv').config({ path: '.env.capabilities' }); 
+
 const fs = require('fs');
 
 const reporter = require('multiple-cucumber-html-reporter'); // ✅ multiple-cucumber-html-reporter 추가
-const cucumberReport = require('wdio-cucumberjs-json-reporter')
+const cucumberReport = require('wdio-cucumberjs-json-reporter');
 
 const jsonFolderPath = './reports/cucumber-json';
 const htmlReportPath = './reports/cucumber-html';
 const screenshotsPath = './reports/screenshot';
+
+const deviceADeviceName = process.env.DEVICEA_DEVICE_NAME;
+const deviceBDeviceName = process.env.DEVICEB_DEVICE_NAME;
+
+// 각 디바이스 정보 찾기
+const capabilities = JSON.parse(process.env.CAPABILITIES); // 전체 디바이스 리스트
+
+const deviceACapabilities = capabilities.find(device => device['appium:deviceName'] === deviceADeviceName);
+// console.log(deviceACapabilities);
+const deviceBCapabilities = capabilities.find(device => device['appium:deviceName'] === deviceBDeviceName);
+// console.log(deviceBCapabilities);
+
 exports.config = {
     //
     // ============
@@ -24,20 +38,15 @@ exports.config = {
     // and 30 processes will get spawned. The property handles how many capabilities
     // from the same test should run tests.
     //
-    maxInstances: 10,
-    //
-    // If you have trouble getting all important capabilities together, check out the
-    // Sauce Labs platform configurator - a great tool to configure your capabilities:
-    // https://saucelabs.com/platform/platform-configurator
-    //
-    capabilities: [{
-        // capabilities for local Appium web tests on an Android Emulator
-        platformName: 'Android',
-        'appium:deviceName': 'Galaxy S21',
-        'appium:platformVersion': '14.0',
-        'appium:automationName': 'UiAutomator2',
-        'appium:noReset': false
-    }],
+    maxInstances: 2,
+    
+    capabilities: [
+        {
+            deviceA: { capabilities: deviceACapabilities }
+        ,
+            deviceB: { capabilities: deviceBCapabilities }
+        }
+    ],
 
     //
     // ===================
@@ -124,7 +133,7 @@ exports.config = {
     ],
 
     specs: [
-        './src/features/**/Demo1.feature'
+        './src/features/**/Demo4.feature'
     ],
     // Patterns to exclude.
     exclude: [
@@ -133,7 +142,7 @@ exports.config = {
     // If you are using Cucumber you need to specify the location of your step definitions.
     cucumberOpts: {
         // <string[]> (file/dir) require files before executing features
-        require: ['./src/step-definitions/**/Demo1.steps.js'],
+        require: ['./src/step-definitions/**/Demo4.steps.js'],
         // <boolean> show full backtrace for errors
         backtrace: false,
         // <string[]> ("extension:module") require files with the given EXTENSION after requiring MODULE (repeatable)
